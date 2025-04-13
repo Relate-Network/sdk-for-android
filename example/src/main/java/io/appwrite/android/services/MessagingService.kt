@@ -1,5 +1,7 @@
 package io.appwrite.android.services
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.google.firebase.messaging.FirebaseMessagingService
 import io.appwrite.ID
 import io.appwrite.services.Account
@@ -11,6 +13,7 @@ class MessagingService : FirebaseMessagingService() {
         var account: Account? = null
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 

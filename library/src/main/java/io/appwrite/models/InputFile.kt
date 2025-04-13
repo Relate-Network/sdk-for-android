@@ -1,5 +1,7 @@
 package io.appwrite.models
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.io.File
 import java.net.URLConnection
 import java.nio.file.Files
@@ -14,6 +16,7 @@ class InputFile private constructor() {
     lateinit var data: Any
 
     companion object {
+        @RequiresApi(Build.VERSION_CODES.O)
         fun fromFile(file: File) = InputFile().apply {
             path = file.canonicalPath
             filename = file.name
@@ -23,6 +26,7 @@ class InputFile private constructor() {
             sourceType = "file"
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun fromPath(path: String): InputFile = fromFile(File(path)).apply {
             sourceType = "path"
         }

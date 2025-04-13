@@ -1,80 +1,151 @@
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'maven-publish'
 }
 
 ext {
     PUBLISH_GROUP_ID = 'io.appwrite'
     PUBLISH_ARTIFACT_ID = 'sdk-for-android'
-    PUBLISH_VERSION = System.getenv('SDK_VERSION')
+    PUBLISH_VERSION = System.getenv('SDK_VERSION') ?: '1.0.0-safe'
     POM_URL = 'https://github.com/appwrite/sdk-for-android'
     POM_SCM_URL = 'https://github.com/appwrite/sdk-for-android'
     POM_ISSUE_URL = 'https://github.com/appwrite/sdk-for-android/issues'
-    POM_DESCRIPTION = 'Appwrite is an open-source backend as a service server that abstract and simplify complex and repetitive development tasks behind a very simple to use REST API. Appwrite aims to help you develop your apps faster and in a more secure way. Use the Android SDK to integrate your app with the Appwrite server to easily start interacting with all of Appwrite backend APIs and tools. For full API documentation and tutorials go to [https://appwrite.io/docs](https://appwrite.io/docs)'
+    POM_DESCRIPTION = 'Appwrite Android SDK for integrating with Appwrite backend services.'
     POM_LICENSE_URL = 'https://opensource.org/licenses/GPL-3.0'
-    POM_LICENSE_NAME = "GPL-3.0"
+    POM_LICENSE_NAME = 'GPL-3.0'
     POM_DEVELOPER_ID = 'appwrite'
     POM_DEVELOPER_NAME = 'Appwrite Team'
     POM_DEVELOPER_EMAIL = 'team@appwrite.io'
     GITHUB_SCM_CONNECTION = 'scm:git:git://github.com/appwrite/sdk-for-android.git'
 }
 
-version PUBLISH_VERSION
-
 android {
-    namespace PUBLISH_GROUP_ID
-
-    compileSdkVersion(34)
+    namespace 'io.appwrite'
+    compileSdk 34
 
     buildFeatures {
         buildConfig true
     }
 
     defaultConfig {
-        minSdkVersion(21)
-        targetSdkVersion(34)
-        versionCode = 1
-        versionName = "1.0"
-        buildConfigField "String", "SDK_VERSION", "\"${PUBLISH_VERSION}\""
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName PUBLISH_VERSION
+        buildConfigField 'String', 'SDK_VERSION', "\"${PUBLISH_VERSION}\""
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = '1.8'
+    }
+
+    lint {
+        abortOnError false
     }
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
-
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.google.code.gson:gson:2.10.1")
-
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.7.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("androidx.activity:activity-ktx:1.8.2")
-    implementation("androidx.browser:browser:1.7.0")
-    implementation("androidx.core:core-ktx:1.12.0")
-
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
-    testImplementation("androidx.test:core-ktx:1.5.0")
-    testImplementation("org.robolectric:robolectric:4.11.1")
-    testApi("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.7.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.activity:activity-ktx:1.8.2'
+    implementation 'androidx.browser:browser:1.7.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'androidx.test.ext:junit-ktx:1.1.5'
+    testImplementation 'androidx.test:core-ktx:1.5.0'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
+    testApi 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1'
 }
 
-apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+tasks.register('javadoc', Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    destinationDir = file("$projectDir/../javadoc/")
+    failOnError false
+    classpath += project.files(android.getBootClasspath())
+    exclude '**/*.kt'
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn tasks.named('javadoc')
+    archiveClassifier.set('javadoc')
+    from file("$projectDir/../javadoc/")
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = PUBLISH_GROUP_ID
+            artifactId = PUBLISH_ARTIFACT_ID
+            version = PUBLISH_VERSION
+            artifact file("$buildDir/outputs/aar/library-release.aar")
+            artifact tasks.named('sourcesJar')
+            artifact tasks.named('javadocJar')
+            pom {
+                name = PUBLISH_ARTIFACT_ID
+                description = POM_DESCRIPTION
+                url = POM_URL
+                licenses {
+                    license {
+                        name = POM_LICENSE_NAME
+                        url = POM_LICENSE_URL
+                    }
+                }
+                developers {
+                    developer {
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        email = POM_DEVELOPER_EMAIL
+                    }
+                }
+                scm {
+                    connection = GITHUB_SCM_CONNECTION
+                    url = POM_SCM_URL
+                }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.releaseCompileClasspath.resolvedConfiguration
+                            .firstLevelModuleDependencies.each {
+                        def dependency = dependenciesNode.appendNode('dependency')
+                        dependency.appendNode('groupId', it.moduleGroup)
+                        dependency.appendNode('artifactId', it.moduleName)
+                        dependency.appendNode('version', it.moduleVersion)
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+tasks.named('publishReleasePublicationToMavenLocal') {
+    dependsOn tasks.named('assembleRelease')
+}

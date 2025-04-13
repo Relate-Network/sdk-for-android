@@ -1,5 +1,7 @@
 package io.appwrite
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.time.Instant
 import kotlin.math.floor
 import kotlin.random.Random
@@ -11,6 +13,7 @@ class ID {
     companion object {
         // Generate an hex ID based on timestamp
         // Recreated from https://www.php.net/manual/en/function.uniqid.php
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun hexTimestamp(): String {
             val now = Instant.now()
             val sec = now.epochSecond
@@ -30,6 +33,7 @@ class ID {
          * @param padding The number of characters to add to the ID
          * @returns The unique ID
          */
+        @RequiresApi(Build.VERSION_CODES.O)
         fun unique(padding: Int = 7): String {
             val baseId = hexTimestamp()
             val randomPadding = (1..padding)

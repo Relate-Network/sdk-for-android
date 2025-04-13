@@ -1,6 +1,8 @@
 package io.appwrite.android.ui.accounts
 
+import android.os.Build
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import io.appwrite.ID
 import io.appwrite.android.services.MessagingService
@@ -32,6 +34,7 @@ class AccountsViewModel : ViewModel() {
         account
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onLogin(
         email: String,
         password: String,
@@ -58,6 +61,7 @@ class AccountsViewModel : ViewModel() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onSignup(email: String, password: String, name: String) {
         viewModelScope.launch {
             try {

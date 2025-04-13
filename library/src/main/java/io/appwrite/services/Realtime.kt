@@ -171,12 +171,39 @@ class Realtime(client: Client) : Service(client), CoroutineScope {
             super.onMessage(webSocket, text)
 
             launch(IO) {
-                val message = text.fromJson<RealtimeResponse>()
-                when (message.type) {
-                    TYPE_ERROR -> handleResponseError(message)
-                    TYPE_EVENT -> handleResponseEvent(message)
-                    TYPE_PONG -> {}
+                try {
+                    val message = text.fromJson<RealtimeResponse>()
+
+                    when (message.type) {
+                        TYPE_ERROR -> {
+                            try {
+                                handleResponseError(message)
+                            } catch (e: Exception) {
+                                Log.e("AppwriteRealtime", "Realtime error skipped: ${e.message}", e)
+                            }
+                        }
+
+                        TYPE_EVENT -> {
+                            try {
+                                handleResponseEvent(message)
+                            } catch (e: Exception) {
+                                Log.e("AppwriteRealtime", "Failed to handle Realtime event: ${e.message}", e)
+                            }
+                        }
+
+                        TYPE_PONG -> {
+                            // Do nothing for pings
+                        }
+
+                        else -> {
+                            Log.w("AppwriteRealtime", "Unknown message type: ${message.type}")
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    Log.e("AppwriteRealtime", "Malformed WebSocket message skipped:\n$text", e)
                 }
+
             }
         }
 

@@ -32,7 +32,8 @@ publishing {
             artifacts {
                 artifact(sourcesJar)
                 artifact(javadocJar)
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+                artifact("/outputs/aar/${project.name}-release.aar")
+
             }
 
             pom {
@@ -83,6 +84,7 @@ ext["signing.keyId"] = rootProject.ext["signing.keyId"]
 ext["signing.password"] = rootProject.ext["signing.password"]
 ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
 
-signing {
-    sign publishing.publications
+
+tasks.withType(Sign).configureEach {
+    enabled = false
 }
